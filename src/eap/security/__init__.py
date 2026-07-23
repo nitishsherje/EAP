@@ -56,18 +56,37 @@ class SecretsProvider(ABC):
 
 
 class EnvSecretsProvider(SecretsProvider):
-    """Reads secrets from environment variables (``EAP_SECRET_<UPPER_NAME>``).
+    """Reads secrets from environment variables.
 
-    Suitable for dev and for K8s where secrets are mounted as env vars. Replace
-    with the enterprise secrets manager in production.
+    Lookup order for a logical ``secret_ref`` name:
+      1. ``EAP_SECRET_<UPPER_NAME>`` (dashes → underscores)
+      2. Well-known aliases (e.g. ``LLM_GATEWAY_API_KEY``, ``DOCLING_API_KEY``)
+
+    Suitable for local/dev and for K8s env-injected secrets. Replace with the
+    enterprise secrets manager in production.
     """
+
+    _ALIASES: dict[str, tuple[str, ...]] = {
+        "llm-gateway-oauth": ("LLM_GATEWAY_API_KEY", "EAP_LLM_GATEWAY_API_KEY"),
+        "llm_gateway_oauth": ("LLM_GATEWAY_API_KEY", "EAP_LLM_GATEWAY_API_KEY"),
+        "docling-oauth": ("DOCLING_API_KEY", "EAP_DOCLING_API_KEY"),
+        "docling_oauth": ("DOCLING_API_KEY", "EAP_DOCLING_API_KEY"),
+        "milvus-api-key": ("MILVUS_API_KEY", "EAP_MILVUS_API_KEY"),
+    }
 
     def __init__(self, prefix: str = "EAP_SECRET_") -> None:
         self._prefix = prefix
 
     def get_secret(self, name: str) -> str | None:
         env_key = self._prefix + name.upper().replace("-", "_")
-        return os.environ.get(env_key)
+        value = os.environ.get(env_key)
+        if value:
+            return value
+        for alias in self._ALIASES.get(name, ()) + self._ALIASES.get(name.replace("_", "-"), ()):
+            alias_val = os.environ.get(alias)
+            if alias_val:
+                return alias_val
+        return None
 
 
 # --------------------------------------------------------------------------- #

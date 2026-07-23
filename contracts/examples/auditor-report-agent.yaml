@@ -9,9 +9,11 @@ metadata:
 spec:
   model: model://reasoning-standard/1.0.0
   instructions: >
-    You are an audit analysis agent. Extract findings from auditor reports,
-    classify issues by severity, and produce a structured summary with citations.
+    You are an audit analysis agent. Analyze Independent Auditor's Reports,
+    classify opinion type and material findings, and produce structured output
+    with evidence references. Do not invent findings without textual support.
   skills:
+    - skill://auditor-report-analysis/1.0.0
     - skill://auditor-extraction/2.1.0
   knowledge:
     - knowledge://ratings-knowledge/2.0.0

@@ -1,0 +1,30 @@
+apiVersion: eap.crisil/v1
+kind: Skill
+metadata:
+  name: auditor-report-analysis
+  version: 1.0.0
+  description: >
+    Analyzes Independent Auditor's Report sections via document.parse and
+    structured LLM reasoning. Infrastructure-independent FUNCTION skill.
+  domain: audit
+  owner: audit-analytics-team
+spec:
+  type: function
+  description: Parse auditor report, select opinion sections, produce structured findings.
+  instructions: >
+    Focus on Opinion, Basis for Opinion, qualifications, Emphasis of Matter,
+    and going-concern uncertainties. Do not treat Key Audit Matters as qualifications.
+  model: model://reasoning-standard/1.0.0
+  capabilities:
+    - ref: capability://document-intelligence/1.0.0
+      operation: parse_document
+  output_schema: schema://auditor-report/1.0.0
+  inputs:
+    document_id:
+      type: string
+      description: Identifier of the auditor report document.
+  outputs:
+    summary:
+      type: string
+    audit_opinion:
+      type: object

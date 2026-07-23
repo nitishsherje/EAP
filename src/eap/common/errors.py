@@ -159,6 +159,18 @@ class CapabilityError(EapError):
     default_code = ErrorCode.CAPABILITY_UNKNOWN
 
 
+class DocumentParsingError(AdapterError):
+    """Raised when document parsing fails at the Docling/adapter boundary."""
+
+    default_code = ErrorCode.ADAPTER_ERROR
+
+
+class LLMGatewayError(AdapterError):
+    """Raised when the enterprise LLM gateway call fails."""
+
+    default_code = ErrorCode.ADAPTER_ERROR
+
+
 @dataclass
 class ValidationResult:
     """Aggregate result of a validation pass."""

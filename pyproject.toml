@@ -90,7 +90,7 @@ layers = [
     "eap.adapters",
     "eap.persistence",
     "eap.security | eap.observability | eap.evaluation",
-    "eap.specifications",
+    "eap.specifications | eap.documents",
     "eap.common",
 ]
 ignore_imports = [

@@ -28,6 +28,12 @@ class AdapterConfig:
     config: dict = field(default_factory=dict)
     timeout_seconds: float = 30.0
     max_retries: int = 2
+    # Transport knobs (from Settings + binding.config; never from AgentSpec).
+    path: str | None = None
+    method: str = "POST"
+    headers: dict = field(default_factory=dict)
+    verify_tls: bool = True
+    correlation_id: str = ""
 
 
 # --------------------------------------------------------------------------- #
@@ -45,6 +51,8 @@ class LLMRequest:
     messages: list[Message]
     parameters: dict = field(default_factory=dict)
     structured: bool = False
+    correlation_id: str = ""
+    metadata: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -75,6 +83,8 @@ class APIRequest:
     path: str
     body: dict = field(default_factory=dict)
     query: dict = field(default_factory=dict)
+    headers: dict = field(default_factory=dict)
+    correlation_id: str = ""
 
 
 @dataclass

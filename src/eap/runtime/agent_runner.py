@@ -36,13 +36,22 @@ class AgentOutcome:
 def build_invokers(
     rd: ResolvedDefinition, agent: Agent, services: RuntimeServices, request: ExecutionRequest
 ) -> Invokers:
+    correlation_id = request.run_id
+
     def model_invoker(messages, structured):
         return services.model_provider.invoke(
-            rd, agent.spec.model, messages, structured=structured, tenant=request.principal.tenant
+            rd,
+            agent.spec.model,
+            messages,
+            structured=structured,
+            tenant=request.principal.tenant,
+            correlation_id=correlation_id,
         )
 
     def tool_invoker(cap_ref, operation, inputs):
-        return services.capability_manager.invoke(rd, cap_ref, operation, inputs)
+        return services.capability_manager.invoke(
+            rd, cap_ref, operation, inputs, correlation_id=correlation_id
+        )
 
     def knowledge_invoker(knowledge_ref, query):
         return services.knowledge_service.retrieve(rd, knowledge_ref, query, request.principal)
@@ -77,6 +86,8 @@ def run_agent(
         output_schema_ref=agent.spec.output_schema,
         max_iterations=agent.spec.max_iterations,
         history=history,
+        correlation_id=request.run_id,
+        run_id=request.run_id,
     )
     result = services.framework.run_agent(invocation, invokers)
     response = services.response_service.build(

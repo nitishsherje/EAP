@@ -36,6 +36,8 @@ from eap.runtime import (
     RuntimeServices,
     StateCheckpointService,
 )
+from eap.runtime.skill_context import SkillHandlerRegistry
+from eap.runtime.skills import auditor_report_analysis
 from eap.security import (
     AllowAllAuthenticator,
     EnvSecretsProvider,
@@ -90,6 +92,8 @@ class EapApplication:
         )
 
         # Runtime.
+        skill_handlers = SkillHandlerRegistry()
+        skill_handlers.register("auditor-report-analysis", auditor_report_analysis)
         self.services = RuntimeServices(
             settings=self.settings,
             secrets=self.secrets,
@@ -101,7 +105,7 @@ class EapApplication:
             state_service=StateCheckpointService(self.state_store),
             hitl_service=HITLService(self.events, auto_approve=True),
             response_service=ResponseService(guardrail),
-            framework=InProcessAgentFramework(),
+            framework=InProcessAgentFramework(skill_handlers),
             events=self.events,
             telemetry=self.telemetry,
             metadata_repo=self.metadata_repo,

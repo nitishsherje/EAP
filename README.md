@@ -50,7 +50,8 @@ pip install -e ".[dev]"
 python -m eap.api_gateway.cli demo
 
 # Register + resolve + run an agent from example YAML:
-python -m eap.api_gateway.cli run-agent contracts/examples/auditor_report_agent.yaml
+python -m eap.api_gateway.cli run-agent agent://auditor-report-agent/1.0.0
+# or: eap demo
 
 # Start the API:
 uvicorn eap.api_gateway.app:app --reload

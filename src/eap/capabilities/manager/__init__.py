@@ -58,6 +58,8 @@ class CapabilityManager:
         capability_ref: str,
         operation_name: str,
         inputs: dict[str, Any],
+        *,
+        correlation_id: str = "",
     ) -> CapabilityResult:
         pinned = rd.pin(capability_ref)
         capability = rd.bundle.capabilities.get(pinned)
@@ -74,11 +76,18 @@ class CapabilityManager:
         binding = rd.binding_for(capability_ref)
 
         with self._telemetry.span(
-            "capability.invoke", capability=capability.metadata.name, operation=operation_name
+            "capability.invoke",
+            capability=capability.metadata.name,
+            operation=operation_name,
+            correlation_id=correlation_id or "",
         ):
             try:
                 output = client.invoke(capability, operation, inputs, binding)
             except NotImplementedError as exc:
+                return CapabilityResult(
+                    capability=pinned, operation=operation_name, error=str(exc)
+                )
+            except Exception as exc:  # noqa: BLE001
                 return CapabilityResult(
                     capability=pinned, operation=operation_name, error=str(exc)
                 )

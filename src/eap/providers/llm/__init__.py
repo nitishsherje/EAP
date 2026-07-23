@@ -64,13 +64,16 @@ class ModelProvider:
         *,
         structured: bool | None = None,
         tenant: str = "default",
+        correlation_id: str = "",
     ) -> ModelResult:
         """Invoke a model with routing + fallback. Records token usage."""
         chain = self._routing_chain(rd, model_ref)
         last_error: Exception | None = None
         for index, pinned in enumerate(chain):
             try:
-                result = self._invoke_one(rd, pinned, messages, structured, tenant)
+                result = self._invoke_one(
+                    rd, pinned, messages, structured, tenant, correlation_id=correlation_id
+                )
                 result.used_fallback = index > 0
                 return result
             except Exception as exc:  # noqa: BLE001
@@ -119,6 +122,7 @@ class ModelProvider:
         messages: list[Message],
         structured: bool | None,
         tenant: str,
+        correlation_id: str = "",
     ) -> ModelResult:
         profile = rd.bundle.models.get(pinned)
         adapter, deployment, params = self._prepare(rd, pinned)
@@ -130,9 +134,10 @@ class ModelProvider:
             messages=messages,
             parameters=params,
             structured=want_structured,
+            correlation_id=correlation_id,
         )
 
-        with self.telemetry.span("llm.complete", model=deployment):
+        with self.telemetry.span("llm.complete", model=deployment, correlation_id=correlation_id or ""):
             response = self._breaker.call(
                 lambda: retry_call(lambda: adapter.complete(request), self.retry_policy)
             )

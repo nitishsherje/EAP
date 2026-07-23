@@ -27,23 +27,61 @@ from eap.security import SecretsProvider
 from eap.specifications.binding import CapabilityBinding
 
 
-def build_adapter_config(binding: CapabilityBinding, secrets: SecretsProvider) -> AdapterConfig:
+def build_adapter_config(
+    binding: CapabilityBinding,
+    secrets: SecretsProvider,
+    settings: Settings | None = None,
+    *,
+    correlation_id: str = "",
+) -> AdapterConfig:
     spec = binding.spec
     secret_value = secrets.get_secret(spec.auth.secret_ref) if spec.auth.secret_ref else None
+    cfg = dict(spec.config)
+    headers = dict(cfg.pop("headers", {}) or {})
+    endpoint = spec.endpoint
+    timeout = spec.timeout_seconds
+    path = cfg.get("path")
+    method = str(cfg.get("method", "POST"))
+    verify_tls = True
+
+    if settings is not None:
+        adapter_id = spec.adapter
+        if adapter_id == "llm_gateway":
+            endpoint = endpoint or settings.llm_gateway_base_url or None
+            path = path or settings.llm_gateway_path
+            timeout = settings.llm_gateway_timeout_seconds or timeout
+            verify_tls = settings.llm_gateway_verify_tls
+            if settings.llm_gateway_model and "deployment" not in cfg:
+                cfg["deployment"] = settings.llm_gateway_model
+        elif adapter_id == "docling":
+            endpoint = endpoint or settings.docling_base_url or None
+            path = path or settings.docling_parse_path
+            timeout = settings.docling_timeout_seconds or timeout
+            verify_tls = settings.docling_verify_tls
+
     return AdapterConfig(
         adapter=spec.adapter,
-        endpoint=spec.endpoint,
+        endpoint=endpoint,
         secret=secret_value,
-        config=dict(spec.config),
-        timeout_seconds=spec.timeout_seconds,
+        config=cfg,
+        timeout_seconds=timeout,
         max_retries=spec.max_retries,
+        path=str(path) if path else None,
+        method=method,
+        headers=headers,
+        verify_tls=verify_tls,
+        correlation_id=correlation_id,
     )
 
 
 def build_llm_adapter(
-    binding: CapabilityBinding, secrets: SecretsProvider, settings: Settings
+    binding: CapabilityBinding,
+    secrets: SecretsProvider,
+    settings: Settings,
+    *,
+    correlation_id: str = "",
 ) -> LLMAdapter:
-    cfg = build_adapter_config(binding, secrets)
+    cfg = build_adapter_config(binding, secrets, settings, correlation_id=correlation_id)
     if settings.llm_backend == "gateway":
         from eap.adapters.llm_gateway import CrisilLLMGatewayAdapter
 
@@ -54,9 +92,13 @@ def build_llm_adapter(
 
 
 def build_api_adapter(
-    binding: CapabilityBinding, secrets: SecretsProvider, settings: Settings
+    binding: CapabilityBinding,
+    secrets: SecretsProvider,
+    settings: Settings,
+    *,
+    correlation_id: str = "",
 ) -> APIAdapter:
-    cfg = build_adapter_config(binding, secrets)
+    cfg = build_adapter_config(binding, secrets, settings, correlation_id=correlation_id)
     adapter_id = binding.spec.adapter
     if adapter_id == "docling":
         if settings.docling_backend == "gateway":
@@ -66,7 +108,6 @@ def build_api_adapter(
         from eap.adapters.docling import FakeDoclingAdapter
 
         return FakeDoclingAdapter(cfg)
-    # enterprise_api (default)
     if settings.api_backend == "real":
         from eap.adapters.enterprise_api import EnterpriseAPIAdapter
 
@@ -79,7 +120,7 @@ def build_api_adapter(
 def build_vector_adapter(
     binding: CapabilityBinding, secrets: SecretsProvider, settings: Settings
 ) -> VectorStoreAdapter:
-    cfg = build_adapter_config(binding, secrets)
+    cfg = build_adapter_config(binding, secrets, settings)
     if settings.vector_backend == "milvus":
         from eap.adapters.milvus import MilvusAdapter
 
