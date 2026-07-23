@@ -1,0 +1,15 @@
+apiVersion: eap.crisil/v1
+kind: ModelProfile
+metadata:
+  name: reasoning-fallback
+  version: 1.0.0
+  description: Fallback reasoning model profile used when the primary is unavailable.
+  domain: platform
+  owner: platform-team
+spec:
+  model: reasoning-lite
+  provider: crisil-llm-gateway
+  parameters:
+    temperature: 0.2
+    max_tokens: 1024
+  structured_output: true

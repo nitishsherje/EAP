@@ -1,0 +1,133 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eap"
+version = "1.0.0"
+description = "Core EAP v1.0 - Enterprise Agent Platform (specification-driven, governed agent execution over existing CRISIL capabilities)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [{ name = "CRISIL EAP Platform Team" }]
+
+dependencies = [
+    "pydantic>=2.6,<3",
+    "pyyaml>=6.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "httpx>=0.27",
+    "opentelemetry-api>=1.24",
+]
+
+[project.optional-dependencies]
+# Real backing-service clients. The core runs with in-process fakes without these.
+adapters = [
+    "boto3>=1.34",          # S3 / object storage
+    "psycopg[binary]>=3.1", # PostgreSQL metadata / state
+    "pymilvus>=2.4",        # Milvus vector search
+    "redis>=5.0",           # optional cache
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "import-linter>=2.0",
+    "types-PyYAML>=6.0",
+]
+
+[project.scripts]
+eap = "eap.api_gateway.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+eap = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+ignore = [
+    "B008",   # FastAPI Depends() default-arg pattern
+    "UP042",  # str+Enum is intentional for pydantic/JSON friendliness (vs. StrEnum)
+]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["eap"]
+mypy_path = "src"
+plugins = ["pydantic.mypy"]
+warn_unused_ignores = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------------------
+# import-linter: enforces the inner-to-outer dependency rule from the blueprint.
+# Nothing inner may import anything outer. Runtime must never import control_plane.
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "eap"
+
+[[tool.importlinter.contracts]]
+name = "Layered architecture (inner-to-outer only)"
+type = "layers"
+layers = [
+    "eap.api_gateway",
+    "eap.runtime",
+    "eap.knowledge | eap.providers | eap.capabilities",
+    "eap.control_plane",
+    "eap.adapters",
+    "eap.persistence",
+    "eap.security | eap.observability | eap.evaluation",
+    "eap.specifications",
+    "eap.common",
+]
+ignore_imports = [
+    # Composition root wiring is allowed to touch everything.
+    "eap.api_gateway.* -> eap.**",
+]
+
+[[tool.importlinter.contracts]]
+name = "Runtime must not import Control Plane"
+type = "forbidden"
+source_modules = ["eap.runtime"]
+forbidden_modules = ["eap.control_plane"]
+
+[[tool.importlinter.contracts]]
+name = "Specifications is pure domain"
+type = "forbidden"
+source_modules = ["eap.specifications"]
+forbidden_modules = [
+    "eap.control_plane",
+    "eap.runtime",
+    "eap.adapters",
+    "eap.providers",
+    "eap.capabilities",
+    "eap.knowledge",
+    "eap.persistence",
+    "eap.api_gateway",
+]
+
+[[tool.importlinter.contracts]]
+name = "Adapters are leaf transport modules"
+type = "forbidden"
+source_modules = ["eap.adapters"]
+forbidden_modules = [
+    "eap.control_plane",
+    "eap.runtime",
+    "eap.providers",
+    "eap.capabilities",
+    "eap.knowledge",
+    "eap.api_gateway",
+]

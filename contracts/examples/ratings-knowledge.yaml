@@ -1,0 +1,19 @@
+apiVersion: eap.crisil/v1
+kind: Knowledge
+metadata:
+  name: ratings-knowledge
+  version: 2.0.0
+  description: Curated ratings knowledge base with retrieval and access control.
+  domain: ratings
+  owner: ratings-knowledge-team
+spec:
+  source: vector-store
+  strategy: hybrid
+  embedding_profile: standard-embedding
+  top_k: 10
+  rerank:
+    enabled: true
+    top_n: 5
+  permission_scoped: true
+  classification: confidential
+  citations: true

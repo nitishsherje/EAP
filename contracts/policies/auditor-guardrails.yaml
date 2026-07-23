@@ -1,0 +1,21 @@
+apiVersion: eap.crisil/v1
+kind: Policy
+metadata:
+  name: auditor-guardrails
+  version: 1.0.0
+  description: Access and content guardrails for the auditor agent.
+  domain: audit
+  owner: governance-team
+spec:
+  data_classification: confidential
+  statements:
+    - effect: allow
+      actions: [run, resolve]
+      resources: ["agent://auditor-report-agent/*"]
+  guardrails:
+    - name: pii-redaction
+      type: pii
+      action: redact
+    - name: content-safety
+      type: content_safety
+      action: block

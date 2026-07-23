@@ -1,0 +1,29 @@
+apiVersion: eap.crisil/v1
+kind: OutputSchema
+metadata:
+  name: auditor-report
+  version: 1.0.0
+  description: Structured output contract for the auditor report agent.
+  domain: audit
+  owner: audit-analytics-team
+spec:
+  schema:
+    type: object
+    properties:
+      summary:
+        type: string
+      findings:
+        type: array
+        items:
+          type: object
+          properties:
+            issue:
+              type: string
+            severity:
+              type: string
+              enum: [low, medium, high]
+      citations:
+        type: array
+        items:
+          type: string
+    required: [summary, findings]

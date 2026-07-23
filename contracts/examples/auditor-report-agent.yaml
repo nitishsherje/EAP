@@ -1,0 +1,23 @@
+apiVersion: eap.crisil/v1
+kind: Agent
+metadata:
+  name: auditor-report-agent
+  version: 1.0.0
+  description: Analyzes auditor reports and flags issues.
+  domain: audit
+  owner: audit-analytics-team
+spec:
+  model: model://reasoning-standard/1.0.0
+  instructions: >
+    You are an audit analysis agent. Extract findings from auditor reports,
+    classify issues by severity, and produce a structured summary with citations.
+  skills:
+    - skill://auditor-extraction/2.1.0
+  knowledge:
+    - knowledge://ratings-knowledge/2.0.0
+  guardrails: policy://auditor-guardrails/1.0.0
+  output_schema: schema://auditor-report/1.0.0
+  memory:
+    scope: session
+    max_turns: 20
+  max_iterations: 6
