@@ -68,3 +68,11 @@ mypy
 lint-imports        # enforces the layered dependency contract
 pytest
 ```
+
+## Documentation
+
+Implementation-accurate technical documentation (designed vs current clearly labeled):
+
+→ **[docs/README.md](docs/README.md)** — Core EAP Technical Architecture & Developer Documentation v1.0
+
+Evidence baseline used before authoring: [docs/_meta/documentation-foundation.md](docs/_meta/documentation-foundation.md).

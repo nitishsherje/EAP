@@ -1,8 +1,13 @@
 # Core EAP v1.0 — Component Low-Level Design (Phase 3)
 
-This document details each implemented component: responsibility, key types,
-collaborators, and the invariants it upholds. It is consistent with the frozen
-HLA and the implemented code under `src/eap/`.
+> **Note:** For implementation-accurate status labels (IMPLEMENTED / STUBBED /
+> etc.) and designed-vs-current callouts, prefer the v1.0 doc set starting at
+> [`../README.md`](../README.md). This LLD may still speak in HLA terms (e.g. MAF)
+> where the code uses stand-ins.
+
+This document details each component: responsibility, key types,
+collaborators, and the invariants it upholds. Cross-check against `src/eap/`
+before treating any claim as live behavior.
 
 ## Layering & dependency rule
 

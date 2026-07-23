@@ -1,7 +1,10 @@
 # Core EAP v1.0 — Sequence Diagrams (Phase 4)
 
-Runtime interactions for the primary flows. Participants map directly to
-implemented components.
+> **Note:** Prefer diagrams in the v1.0 doc set ([`../README.md`](../README.md))
+> when distinguishing MAF (designed) vs `InProcessAgentFramework` (current).
+
+Runtime interactions for the primary flows. Participants map to components under
+`src/eap/` — verify stand-ins/stubs before operational use.
 
 ## 1. Register a specification
 
