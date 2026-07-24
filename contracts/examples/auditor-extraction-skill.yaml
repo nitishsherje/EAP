@@ -1,0 +1,23 @@
+apiVersion: eap.crisil/v1
+kind: Skill
+metadata:
+  name: auditor-extraction
+  version: 2.1.0
+  description: Extracts key sections and findings from auditor reports.
+  domain: audit
+  owner: audit-analytics-team
+spec:
+  type: deterministic
+  description: Parse an auditor report and return structured findings.
+  capabilities:
+    - ref: capability://document-intelligence/1.0.0
+      operation: parse_document
+  knowledge:
+    - knowledge://ratings-knowledge/2.0.0
+  inputs:
+    document_id:
+      type: string
+      description: Identifier of the auditor report document.
+  outputs:
+    findings:
+      type: array

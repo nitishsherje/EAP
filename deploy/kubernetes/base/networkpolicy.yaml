@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eap
+  labels:
+    app.kubernetes.io/name: eap
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eap
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Ingress only from the cluster ingress controller / API gateway namespace.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network.crisil/ingress: "true"
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # DNS.
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Egress to enterprise backends (LLM Gateway, Docling, Milvus, Postgres, S3).
+    # Tighten to concrete CIDRs/endpoints per environment.
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 19530

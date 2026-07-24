@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eap-config
+data:
+  EAP_ENV: "dev"
+  # Dev can run entirely on in-process fakes (no external infra required).
+  EAP_METADATA_BACKEND: "memory"
+  EAP_ARTIFACT_BACKEND: "memory"
+  EAP_LLM_BACKEND: "fake"
+  EAP_DOCLING_BACKEND: "fake"
+  EAP_API_BACKEND: "fake"
+  EAP_VECTOR_BACKEND: "memory"
+  EAP_OTEL_ENABLED: "false"
+  EAP_AUTH_ENABLED: "false"

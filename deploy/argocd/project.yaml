@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: eap
+  namespace: argocd
+spec:
+  description: Enterprise Agent Platform
+  sourceRepos:
+    - https://git.crisil.internal/eap/eap.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: eap-dev
+    - server: https://kubernetes.default.svc
+      namespace: eap-prod
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
