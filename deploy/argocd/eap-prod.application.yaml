@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: eap-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: eap
+  source:
+    repoURL: https://git.crisil.internal/eap/eap.git
+    targetRevision: main
+    path: deploy/kubernetes/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: eap-prod
+  syncPolicy:
+    # Prod syncs are gated: manual promotion (no automated self-heal on prune).
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,17 @@
+apiVersion: eap.crisil/v1
+kind: ModelProfile
+metadata:
+  name: reasoning-standard
+  version: 1.0.0
+  description: Standard reasoning model profile served by the CRISIL LLM Gateway.
+  domain: platform
+  owner: platform-team
+spec:
+  model: reasoning-standard
+  provider: crisil-llm-gateway
+  parameters:
+    temperature: 0.2
+    max_tokens: 2048
+  fallback:
+    - model://reasoning-fallback/1.0.0
+  structured_output: true

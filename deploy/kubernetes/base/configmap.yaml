@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eap-config
+  labels:
+    app.kubernetes.io/name: eap
+# Non-secret configuration only. Secrets are supplied via the eap-secrets Secret.
+data:
+  EAP_ENV: "prod"
+  EAP_METADATA_BACKEND: "postgres"
+  EAP_ARTIFACT_BACKEND: "s3"
+  EAP_LLM_BACKEND: "gateway"
+  EAP_DOCLING_BACKEND: "gateway"
+  EAP_API_BACKEND: "real"
+  EAP_VECTOR_BACKEND: "milvus"
+  EAP_OTEL_ENABLED: "true"
+  EAP_AUTH_ENABLED: "true"

@@ -1,0 +1,79 @@
+# Environment-specific bindings for the dev environment.
+# NOTE: no secrets appear here - only logical secret references resolved at runtime.
+apiVersion: eap.crisil/v1
+kind: CapabilityBinding
+metadata:
+  name: document-intelligence-dev
+  version: 1.0.0
+  domain: platform
+  owner: platform-team
+spec:
+  target: capability://document-intelligence/1.0.0
+  environment: dev
+  adapter: docling
+  endpoint: https://docling-gateway.dev.crisil.internal
+  auth:
+    type: oauth
+    secret_ref: docling-oauth
+    scopes: [document.read]
+  config:
+    api_version: v1
+  timeout_seconds: 30
+  max_retries: 2
+---
+apiVersion: eap.crisil/v1
+kind: CapabilityBinding
+metadata:
+  name: ratings-knowledge-dev
+  version: 1.0.0
+  domain: ratings
+  owner: ratings-knowledge-team
+spec:
+  target: knowledge://ratings-knowledge/2.0.0
+  environment: dev
+  adapter: milvus
+  endpoint: milvus.dev.crisil.internal:19530
+  auth:
+    type: api_key
+    secret_ref: milvus-api-key
+  config:
+    collection: ratings_knowledge_v2
+  timeout_seconds: 15
+---
+apiVersion: eap.crisil/v1
+kind: CapabilityBinding
+metadata:
+  name: reasoning-standard-dev
+  version: 1.0.0
+  domain: platform
+  owner: platform-team
+spec:
+  target: model://reasoning-standard/1.0.0
+  environment: dev
+  adapter: llm_gateway
+  endpoint: https://llm-gateway.dev.crisil.internal
+  auth:
+    type: oauth
+    secret_ref: llm-gateway-oauth
+  config:
+    deployment: reasoning-standard
+  timeout_seconds: 60
+---
+apiVersion: eap.crisil/v1
+kind: CapabilityBinding
+metadata:
+  name: reasoning-fallback-dev
+  version: 1.0.0
+  domain: platform
+  owner: platform-team
+spec:
+  target: model://reasoning-fallback/1.0.0
+  environment: dev
+  adapter: llm_gateway
+  endpoint: https://llm-gateway.dev.crisil.internal
+  auth:
+    type: oauth
+    secret_ref: llm-gateway-oauth
+  config:
+    deployment: reasoning-lite
+  timeout_seconds: 60

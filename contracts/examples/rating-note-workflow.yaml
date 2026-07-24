@@ -1,0 +1,24 @@
+apiVersion: eap.crisil/v1
+kind: Workflow
+metadata:
+  name: rating-note-generation
+  version: 1.0.0
+  description: Generate a rating note by extracting, analyzing and summarizing.
+  domain: ratings
+  owner: ratings-team
+spec:
+  pattern: sequential
+  steps:
+    - id: extract
+      type: skill
+      ref: skill://auditor-extraction/2.1.0
+      inputs:
+        document_id: ${input.document_id}
+    - id: analyze
+      type: agent
+      ref: agent://auditor-report-agent/1.0.0
+      depends_on: [extract]
+      inputs:
+        findings: ${extract.output.findings}
+  output_targets: [analyze]
+  on_error: fail
